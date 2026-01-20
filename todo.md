@@ -152,3 +152,25 @@
 - [x] Fix audio recording upload to S3 instead of storing base64 in database
 - [x] Update voice input service to handle S3 upload properly
 - [x] Verify voice transcription works with uploaded files
+
+
+## Phase 16: Voice-to-Chat Integration Fix
+- [x] Debug "Use in Chat" button functionality
+- [x] Fix message creation from transcribed audio
+- [x] Ensure proper conversation ID handling
+- [x] Test end-to-end voice-to-chat flow
+
+## Phase 17: TamilHeritageAI - Literature Learning Platform
+- [ ] Design literature content database schema
+- [ ] Create learning path models (beginner, intermediate, advanced)
+- [ ] Implement Thirukkural learning module with English translations
+- [ ] Build story-based learning (Silappathikaram, Sangam literature)
+- [ ] Create kids learning module with games and progress tracking
+- [ ] Implement deep dive discussion features
+- [ ] Build personalized learning assessment and curriculum
+- [ ] Create admin panel for content management
+- [ ] Integrate IndicBERT for Tamil language understanding
+- [ ] Integrate IndicTTS for Tamil audio generation
+- [ ] Build literature UI components
+- [ ] Add certificate generation on completion
+- [ ] Implement community Q&A features

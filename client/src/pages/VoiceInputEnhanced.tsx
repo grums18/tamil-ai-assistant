@@ -1,10 +1,11 @@
-import React, { useState, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Mic, Square, Play, Trash2, Copy, Download } from "lucide-react";
+import { Loader2, Mic, Square, Play, Trash2, Copy, Send } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useRouter as useWouterRouter } from "wouter";
+import { useState, useRef } from "react";
 
 /**
  * Enhanced Voice Input Page with Better UX
@@ -30,6 +31,8 @@ export default function VoiceInputEnhanced() {
   const audioPlayRef = useRef<HTMLAudioElement | null>(null);
 
   const transcribeMutation = trpc.voice.transcribe.useMutation();
+  const chatMutation = trpc.chat.sendMessage.useMutation();
+  const [, router] = useWouterRouter() as any;
 
   if (!isAuthenticated) {
     return (
@@ -94,7 +97,7 @@ export default function VoiceInputEnhanced() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Audio = reader.result as string;
-        const audioUrl = base64Audio; // In production, upload to S3 first
+        const audioUrl = base64Audio;
 
         try {
           const result = await transcribeMutation.mutateAsync({
@@ -150,6 +153,26 @@ export default function VoiceInputEnhanced() {
   const handleDeleteRecording = (id: string) => {
     setRecordings((prev) => prev.filter((rec) => rec.id !== id));
     toast.success("Recording deleted");
+  };
+
+  const handleUseInChat = async (text: string) => {
+    if (!text.trim()) {
+      toast.error("No text to send to chat");
+      return;
+    }
+
+    try {
+      await chatMutation.mutateAsync({
+        conversationId: 0,
+        message: text,
+        language,
+      });
+      toast.success("Message sent to chat!");
+      router("/chat");
+    } catch (error) {
+      console.error("Error sending to chat:", error);
+      toast.error("Failed to send message to chat");
+    }
   };
 
   const formatDuration = (seconds: number) => {
@@ -268,9 +291,26 @@ export default function VoiceInputEnhanced() {
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
-                <p className="text-white text-lg font-tamil">
+                <p className="text-white text-lg font-tamil mb-4">
                   {transcription}
                 </p>
+                <Button
+                  onClick={() => handleUseInChat(transcription)}
+                  disabled={chatMutation.isPending}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                >
+                  {chatMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending to Chat...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Use in Chat
+                    </>
+                  )}
+                </Button>
               </div>
             )}
           </div>
@@ -299,7 +339,7 @@ export default function VoiceInputEnhanced() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button
                       onClick={() => handlePlayRecording(rec.audioUrl)}
                       size="sm"
@@ -315,6 +355,14 @@ export default function VoiceInputEnhanced() {
                       className="text-slate-400 hover:text-white"
                     >
                       <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={() => handleUseInChat(rec.transcription)}
+                      size="sm"
+                      variant="ghost"
+                      className="text-indigo-400 hover:text-indigo-300"
+                    >
+                      <Send className="w-4 h-4" />
                     </Button>
                     <Button
                       onClick={() => handleDeleteRecording(rec.id)}
