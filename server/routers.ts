@@ -1,10 +1,18 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
+import { getOrCreateCreatorProfile, updateCreatorProfile, getUserById } from "./db";
+import { chatRouter } from "./chat-router";
+import { contentRouter } from "./content-router";
+import { voiceRouter } from "./voice-router";
+import { ragRouter } from "./rag-router";
+import { ttsRouter } from "./tts-router";
+import { adminRouter } from "./admin-router";
+import { storageRouter } from "./storage-router";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -17,12 +25,58 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  // Chat Router
+  chat: chatRouter,
+
+  // Content Generation Router
+  content: contentRouter,
+
+  // Voice Input Router
+  voice: voiceRouter,
+
+  // RAG Knowledge Base Router
+  rag: ragRouter,
+
+  // Text-to-Speech Router
+  tts: ttsRouter,
+
+  // Admin Dashboard Router
+  admin: adminRouter,
+
+  // Storage Router
+  storage: storageRouter,
+
+  // Creator Profile Router
+  creator: router({
+    getProfile: protectedProcedure.query(async ({ ctx }) => {
+      return getOrCreateCreatorProfile(ctx.user.id);
+    }),
+
+    updateProfile: protectedProcedure
+      .input(z.object({
+        channelName: z.string().optional(),
+        channelDescription: z.string().optional(),
+        channelUrl: z.string().optional(),
+        contentCategory: z.string().optional(),
+        preferredLanguage: z.enum(["tamil", "tanglish", "mixed"]).optional(),
+        voicePreference: z.string().optional(),
+        contentStyle: z.string().optional(),
+        targetAudience: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return updateCreatorProfile(ctx.user.id, input);
+      }),
+
+    getStats: protectedProcedure.query(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      const profile = await getOrCreateCreatorProfile(ctx.user.id);
+      return {
+        user,
+        profile,
+        memberSince: user?.createdAt,
+      };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
