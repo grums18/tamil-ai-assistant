@@ -134,8 +134,18 @@ export async function createConversation(userId: number, title?: string, topic?:
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(conversations).values({ userId, title, topic, language });
-  return result;
+  await db.insert(conversations).values({ userId, title, topic, language });
+  
+  const createdConversations = await db.select().from(conversations)
+    .where(eq(conversations.userId, userId))
+    .orderBy(desc(conversations.createdAt))
+    .limit(1);
+  
+  if (!createdConversations || createdConversations.length === 0) {
+    throw new Error("Failed to retrieve created conversation");
+  }
+  
+  return createdConversations[0];
 }
 
 export async function getConversations(userId: number, limit = 50, offset = 0) {
