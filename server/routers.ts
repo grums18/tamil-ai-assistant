@@ -13,6 +13,7 @@ import { adminRouter } from "./admin-router";
 import { storageRouter } from "./storage-router";
 import { schedulingRouter } from "./scheduling-router";
 import { youtubeAnalyticsRouter, collaborationRouter } from "./youtube-collaboration-router";
+import { youtubeRouter } from "./youtube-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -52,6 +53,9 @@ export const appRouter = router({
   scheduling: schedulingRouter,
 
   // YouTube Analytics Router
+  youtube: youtubeRouter,
+
+  // YouTube Analytics Router (Legacy)
   youtubeAnalytics: youtubeAnalyticsRouter,
 
   // Collaboration Router
