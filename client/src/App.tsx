@@ -10,6 +10,7 @@ import Chat from "./pages/Chat";
 import ContentGenerator from "./pages/ContentGenerator";
 import VoiceInput from "./pages/VoiceInput";
 import AdminDashboard from "./pages/AdminDashboard";
+import ChatEnhanced from "./pages/ChatEnhanced";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/profile"} component={CreatorProfile} />
       <Route path={"/chat"} component={Chat} />
+      <Route path={"/chat-enhanced"} component={ChatEnhanced} />
       <Route path={"/script-generator"} component={ContentGenerator} />
       <Route path={"/voice-input"} component={VoiceInput} />
       <Route path={"/admin"} component={AdminDashboard} />
