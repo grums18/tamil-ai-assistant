@@ -288,3 +288,148 @@ export async function getUserAnalytics(userId: number) {
   
   return db.select().from(usageAnalytics).where(eq(usageAnalytics.userId, userId));
 }
+
+
+/**
+ * Scheduling & Publishing Functions
+ */
+
+import { ScheduledContent, InsertScheduledContent, PublishingJob, InsertPublishingJob, SocialMediaIntegration, InsertSocialMediaIntegration, scheduledContent, publishingJobs, socialMediaIntegrations } from "../drizzle/schema";
+import { asc } from "drizzle-orm";
+
+export async function createScheduledContent(
+  userId: number,
+  title: string,
+  description: string,
+  content: string,
+  contentType: "video" | "short" | "post" | "reel",
+  platforms: string[],
+  scheduledAt: Date,
+  language: "tamil" | "tanglish" | "mixed" = "tamil"
+): Promise<ScheduledContent> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(scheduledContent).values({
+    userId,
+    title,
+    description,
+    content,
+    contentType,
+    platforms: JSON.stringify(platforms),
+    scheduledAt,
+    language,
+    status: "draft",
+  });
+
+  const contentId = (result as any).insertId;
+  const rows = await db.select().from(scheduledContent).where(eq(scheduledContent.id, contentId)).limit(1);
+  return rows[0] as ScheduledContent;
+}
+
+export async function getScheduledContent(
+  userId: number,
+  limit: number = 50,
+  offset: number = 0
+): Promise<ScheduledContent[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(scheduledContent)
+    .where(eq(scheduledContent.userId, userId))
+    .orderBy(desc(scheduledContent.scheduledAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+export async function updateScheduledContent(
+  contentId: number,
+  updates: Partial<InsertScheduledContent>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(scheduledContent).set(updates).where(eq(scheduledContent.id, contentId));
+}
+
+export async function createPublishingJob(
+  scheduledContentId: number,
+  userId: number,
+  platform: "youtube" | "instagram" | "tiktok" | "twitter"
+): Promise<PublishingJob> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(publishingJobs).values({
+    scheduledContentId,
+    userId,
+    platform,
+    status: "pending",
+  });
+
+  const jobId = (result as any).insertId;
+  const rows = await db.select().from(publishingJobs).where(eq(publishingJobs.id, jobId)).limit(1);
+  return rows[0] as PublishingJob;
+}
+
+export async function getPendingJobs(
+  limit: number = 100
+): Promise<PublishingJob[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(publishingJobs)
+    .where(eq(publishingJobs.status, "pending"))
+    .orderBy(asc(publishingJobs.createdAt))
+    .limit(limit);
+}
+
+export async function updatePublishingJob(
+  jobId: number,
+  updates: Partial<InsertPublishingJob>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(publishingJobs).set(updates).where(eq(publishingJobs.id, jobId));
+}
+
+export async function getSocialMediaIntegration(
+  userId: number
+): Promise<SocialMediaIntegration | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const rows = await db
+    .select()
+    .from(socialMediaIntegrations)
+    .where(eq(socialMediaIntegrations.userId, userId))
+    .limit(1);
+
+  return rows[0];
+}
+
+export async function updateSocialMediaIntegration(
+  userId: number,
+  updates: Partial<InsertSocialMediaIntegration>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await getSocialMediaIntegration(userId);
+  if (existing) {
+    await db
+      .update(socialMediaIntegrations)
+      .set(updates)
+      .where(eq(socialMediaIntegrations.userId, userId));
+  } else {
+    await db.insert(socialMediaIntegrations).values({
+      userId,
+      ...updates,
+    });
+  }
+}

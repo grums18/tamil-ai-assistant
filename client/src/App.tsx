@@ -11,6 +11,7 @@ import ContentGenerator from "./pages/ContentGenerator";
 import VoiceInput from "./pages/VoiceInput";
 import AdminDashboard from "./pages/AdminDashboard";
 import ChatEnhanced from "./pages/ChatEnhanced";
+import ContentScheduler from "./pages/ContentScheduler";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path={"/script-generator"} component={ContentGenerator} />
       <Route path={"/voice-input"} component={VoiceInput} />
       <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/scheduler"} component={ContentScheduler} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

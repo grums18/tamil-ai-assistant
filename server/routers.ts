@@ -11,6 +11,7 @@ import { ragRouter } from "./rag-router";
 import { ttsRouter } from "./tts-router";
 import { adminRouter } from "./admin-router";
 import { storageRouter } from "./storage-router";
+import { schedulingRouter } from "./scheduling-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -45,6 +46,9 @@ export const appRouter = router({
 
   // Storage Router
   storage: storageRouter,
+
+  // Scheduling Router
+  scheduling: schedulingRouter,
 
   // Creator Profile Router
   creator: router({

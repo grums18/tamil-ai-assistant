@@ -191,3 +191,89 @@ export const usageAnalytics = mysqlTable("usage_analytics", {
 
 export type UsageAnalytics = typeof usageAnalytics.$inferSelect;
 export type InsertUsageAnalytics = typeof usageAnalytics.$inferInsert;
+
+/**
+ * Scheduled content for batch publishing
+ */
+export const scheduledContent = mysqlTable("scheduled_content", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  contentId: int("content_id"),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  content: text("content").notNull(),
+  contentType: mysqlEnum("content_type", ["video", "short", "post", "reel"]).notNull(),
+  language: mysqlEnum("language", ["tamil", "tanglish", "mixed"]).default("tamil"),
+  platforms: json("platforms"), // ["youtube", "instagram", "tiktok", "twitter"]
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  status: mysqlEnum("status", ["draft", "scheduled", "published", "failed", "cancelled"]).default("draft"),
+  videoUrl: varchar("video_url", { length: 512 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 512 }),
+  tags: json("tags"),
+  hashtags: json("hashtags"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  publishedAt: timestamp("published_at"),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  statusIdx: index("status_idx").on(table.status),
+  scheduledAtIdx: index("scheduled_at_idx").on(table.scheduledAt),
+}));
+
+export type ScheduledContent = typeof scheduledContent.$inferSelect;
+export type InsertScheduledContent = typeof scheduledContent.$inferInsert;
+
+/**
+ * Publishing jobs and execution history
+ */
+export const publishingJobs = mysqlTable("publishing_jobs", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduledContentId: int("scheduled_content_id").notNull(),
+  userId: int("user_id").notNull(),
+  platform: mysqlEnum("platform", ["youtube", "instagram", "tiktok", "twitter"]).notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "success", "failed", "retrying"]).default("pending"),
+  platformJobId: varchar("platform_job_id", { length: 255 }),
+  platformUrl: varchar("platform_url", { length: 512 }),
+  errorMessage: text("error_message"),
+  retryCount: int("retry_count").default(0),
+  maxRetries: int("max_retries").default(3),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  scheduledContentIdIdx: index("scheduled_content_id_idx").on(table.scheduledContentId),
+  userIdIdx: index("user_id_idx").on(table.userId),
+  statusIdx: index("status_idx").on(table.status),
+  platformIdx: index("platform_idx").on(table.platform),
+}));
+
+export type PublishingJob = typeof publishingJobs.$inferSelect;
+export type InsertPublishingJob = typeof publishingJobs.$inferInsert;
+
+/**
+ * Social media credentials and integrations
+ */
+export const socialMediaIntegrations = mysqlTable("social_media_integrations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().unique(),
+  youtubeAccessToken: text("youtube_access_token"),
+  youtubeRefreshToken: text("youtube_refresh_token"),
+  youtubeChannelId: varchar("youtube_channel_id", { length: 255 }),
+  instagramAccessToken: text("instagram_access_token"),
+  instagramBusinessAccountId: varchar("instagram_business_account_id", { length: 255 }),
+  tiktokAccessToken: text("tiktok_access_token"),
+  tiktokUserId: varchar("tiktok_user_id", { length: 255 }),
+  twitterAccessToken: text("twitter_access_token"),
+  twitterAccessTokenSecret: text("twitter_access_token_secret"),
+  twitterUserId: varchar("twitter_user_id", { length: 255 }),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+}));
+
+export type SocialMediaIntegration = typeof socialMediaIntegrations.$inferSelect;
+export type InsertSocialMediaIntegration = typeof socialMediaIntegrations.$inferInsert;
