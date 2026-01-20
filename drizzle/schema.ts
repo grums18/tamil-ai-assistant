@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, boolean, decimal, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, index, json } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -277,3 +277,180 @@ export const socialMediaIntegrations = mysqlTable("social_media_integrations", {
 
 export type SocialMediaIntegration = typeof socialMediaIntegrations.$inferSelect;
 export type InsertSocialMediaIntegration = typeof socialMediaIntegrations.$inferInsert;
+
+/**
+ * YouTube Analytics and metrics
+ */
+export const youtubeAnalytics = mysqlTable("youtube_analytics", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  channelId: varchar("channel_id", { length: 255 }).notNull(),
+  videoId: varchar("video_id", { length: 255 }),
+  views: int("views").default(0),
+  likes: int("likes").default(0),
+  comments: int("comments").default(0),
+  shares: int("shares").default(0),
+  watchTime: int("watch_time").default(0), // in minutes
+  averageViewDuration: decimal("average_view_duration", { precision: 5, scale: 2 }).default("0"),
+  clickThroughRate: decimal("click_through_rate", { precision: 5, scale: 2 }).default("0"),
+  subscribers: int("subscribers").default(0),
+  subscriberGrowth: int("subscriber_growth").default(0),
+  audienceDemographics: json("audience_demographics"), // {age: {}, gender: {}, country: {}}
+  trafficSources: json("traffic_sources"), // {youtube_search: 0, browse: 0, external: 0}
+  topVideos: json("top_videos"), // [{videoId, title, views}]
+  metricsDate: timestamp("metrics_date").notNull(),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  channelIdIdx: index("channel_id_idx").on(table.channelId),
+  metricsDateIdx: index("metrics_date_idx").on(table.metricsDate),
+}));
+
+export type YouTubeAnalytics = typeof youtubeAnalytics.$inferSelect;
+export type InsertYouTubeAnalytics = typeof youtubeAnalytics.$inferInsert;
+
+/**
+ * Collaboration projects and workspaces
+ */
+export const collaborationProjects = mysqlTable("collaboration_projects", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creator_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  status: mysqlEnum("status", ["active", "archived", "completed"]).default("active"),
+  visibility: mysqlEnum("visibility", ["private", "team", "public"]).default("private"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  creatorIdIdx: index("creator_id_idx").on(table.creatorId),
+  statusIdx: index("status_idx").on(table.status),
+}));
+
+export type CollaborationProject = typeof collaborationProjects.$inferSelect;
+export type InsertCollaborationProject = typeof collaborationProjects.$inferInsert;
+
+/**
+ * Project members and permissions
+ */
+export const projectMembers = mysqlTable("project_members", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("project_id").notNull(),
+  userId: int("user_id").notNull(),
+  role: mysqlEnum("role", ["owner", "editor", "viewer", "commenter"]).default("editor"),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  permissions: json("permissions"), // {edit: true, comment: true, invite: false}
+  metadata: json("metadata"),
+}, (table) => ({
+  projectIdIdx: index("project_id_idx").on(table.projectId),
+  userIdIdx: index("user_id_idx").on(table.userId),
+}));
+
+export type ProjectMember = typeof projectMembers.$inferSelect;
+export type InsertProjectMember = typeof projectMembers.$inferInsert;
+
+/**
+ * Shared documents and scripts
+ */
+export const sharedDocuments = mysqlTable("shared_documents", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("project_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  documentType: mysqlEnum("document_type", ["script", "outline", "notes", "brainstorm"]).notNull(),
+  content: text("content").notNull(),
+  language: mysqlEnum("language", ["tamil", "tanglish", "mixed"]).default("tamil"),
+  currentVersion: int("current_version").default(1),
+  lastEditedBy: int("last_edited_by"),
+  lastEditedAt: timestamp("last_edited_at"),
+  isLocked: boolean("is_locked").default(false),
+  lockedBy: int("locked_by"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  projectIdIdx: index("project_id_idx").on(table.projectId),
+  documentTypeIdx: index("document_type_idx").on(table.documentType),
+}));
+
+export type SharedDocument = typeof sharedDocuments.$inferSelect;
+export type InsertSharedDocument = typeof sharedDocuments.$inferInsert;
+
+/**
+ * Document versions for history tracking
+ */
+export const documentVersions = mysqlTable("document_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  documentId: int("document_id").notNull(),
+  version: int("version").notNull(),
+  content: text("content").notNull(),
+  editedBy: int("edited_by").notNull(),
+  changesSummary: text("changes_summary"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  documentIdIdx: index("document_id_idx").on(table.documentId),
+  versionIdx: index("version_idx").on(table.version),
+}));
+
+export type DocumentVersion = typeof documentVersions.$inferSelect;
+export type InsertDocumentVersion = typeof documentVersions.$inferInsert;
+
+/**
+ * Comments and annotations on documents
+ */
+export const documentComments = mysqlTable("document_comments", {
+  id: int("id").autoincrement().primaryKey(),
+  documentId: int("document_id").notNull(),
+  userId: int("user_id").notNull(),
+  content: text("content").notNull(),
+  lineNumber: int("line_number"),
+  charOffset: int("char_offset"),
+  resolved: boolean("resolved").default(false),
+  resolvedBy: int("resolved_by"),
+  resolvedAt: timestamp("resolved_at"),
+  replies: json("replies"), // [{userId, content, createdAt}]
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  documentIdIdx: index("document_id_idx").on(table.documentId),
+  userIdIdx: index("user_id_idx").on(table.userId),
+  resolvedIdx: index("resolved_idx").on(table.resolved),
+}));
+
+export type DocumentComment = typeof documentComments.$inferSelect;
+export type InsertDocumentComment = typeof documentComments.$inferInsert;
+
+/**
+ * Collaboration activity log
+ */
+export const collaborationActivity = mysqlTable("collaboration_activity", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("project_id").notNull(),
+  userId: int("user_id").notNull(),
+  activityType: mysqlEnum("activity_type", [
+    "document_created",
+    "document_edited",
+    "document_deleted",
+    "comment_added",
+    "comment_resolved",
+    "member_joined",
+    "member_left",
+    "member_role_changed",
+    "document_locked",
+    "document_unlocked"
+  ]).notNull(),
+  targetId: int("target_id"), // document_id or member_id
+  description: text("description"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  projectIdIdx: index("project_id_idx").on(table.projectId),
+  userIdIdx: index("user_id_idx").on(table.userId),
+  activityTypeIdx: index("activity_type_idx").on(table.activityType),
+}));
+
+export type CollaborationActivity = typeof collaborationActivity.$inferSelect;
+export type InsertCollaborationActivity = typeof collaborationActivity.$inferInsert;

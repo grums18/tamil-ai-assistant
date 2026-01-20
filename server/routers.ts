@@ -12,6 +12,7 @@ import { ttsRouter } from "./tts-router";
 import { adminRouter } from "./admin-router";
 import { storageRouter } from "./storage-router";
 import { schedulingRouter } from "./scheduling-router";
+import { youtubeAnalyticsRouter, collaborationRouter } from "./youtube-collaboration-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -49,6 +50,12 @@ export const appRouter = router({
 
   // Scheduling Router
   scheduling: schedulingRouter,
+
+  // YouTube Analytics Router
+  youtubeAnalytics: youtubeAnalyticsRouter,
+
+  // Collaboration Router
+  collaboration: collaborationRouter,
 
   // Creator Profile Router
   creator: router({
