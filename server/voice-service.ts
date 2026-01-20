@@ -1,5 +1,6 @@
 import { transcribeAudio } from "./_core/voiceTranscription";
 import { saveAudioRecording, addMessage, trackUsage } from "./db";
+import { storagePut } from "./storage";
 
 export interface TranscriptionResult {
   text: string;
@@ -35,12 +36,36 @@ export async function transcribeVoiceInput(
     const detectedLanguage = whisperResult.language || language;
     const transcribedText = whisperResult.text || "";
 
-    // Save audio recording to database
+    // Upload audio to S3 first
     const recordingFileName = fileName || `recording-${Date.now()}.wav`;
+    let s3Url = audioUrl;
+    
+    try {
+      // Convert base64 data URL to buffer if needed
+      let audioBuffer: Buffer;
+      if (audioUrl.startsWith('data:')) {
+        // Extract base64 from data URL
+        const base64Data = audioUrl.split(',')[1];
+        audioBuffer = Buffer.from(base64Data, 'base64');
+      } else {
+        audioBuffer = Buffer.from('');
+      }
+      
+      // Upload to S3 if we have buffer data
+      if (audioBuffer.length > 0) {
+        const storageKey = `audio/${userId}/${Date.now()}-${recordingFileName}`;
+        const result = await storagePut(storageKey, audioBuffer, 'audio/wav');
+        s3Url = result.url;
+      }
+    } catch (s3Error) {
+      console.warn('Failed to upload audio to S3:', s3Error);
+    }
+    
+    // Save audio recording to database with S3 URL
     await saveAudioRecording(
       userId,
       recordingFileName,
-      audioUrl,
+      s3Url,
       detectedLanguage as any,
       conversationId,
       undefined,
@@ -49,7 +74,7 @@ export async function transcribeVoiceInput(
 
     // If conversation ID provided, add message to conversation
     if (conversationId) {
-      await addMessage(conversationId, userId, "user", transcribedText, detectedLanguage as any, audioUrl);
+      await addMessage(conversationId, userId, "user", transcribedText, detectedLanguage as any, s3Url);
     }
 
     // Track usage

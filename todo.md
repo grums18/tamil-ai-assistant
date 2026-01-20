@@ -147,3 +147,8 @@
 - [x] Add version control for collaborative documents
 - [x] Build team member management
 - [x] Create activity feed and notifications
+
+## Bug Fixes - Phase 15
+- [x] Fix audio recording upload to S3 instead of storing base64 in database
+- [x] Update voice input service to handle S3 upload properly
+- [x] Verify voice transcription works with uploaded files
