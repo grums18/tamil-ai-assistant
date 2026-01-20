@@ -95,3 +95,9 @@
 - Using Whisper (fine-tuned) for Tamil ASR
 - Implementing FAISS for vector search
 - All responses must be in Tamil with code-switching support
+
+
+## Bug Fixes Applied
+- [x] Fixed message insertion error - added missing metadata field in addMessage function
+- [x] Fixed conversation ID extraction - properly return conversation object from createConversation
+- [x] Fixed database query parameter mismatch - ensure all required fields are provided

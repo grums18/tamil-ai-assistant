@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, creatorProfiles, InsertCreatorProfile, conversations, messages, generatedContent, ragDocuments, trends, audioRecordings, usageAnalytics } from "../drizzle/schema";
+import { eq, desc } from "drizzle-orm";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -158,12 +158,25 @@ export async function addMessage(conversationId: number, userId: number, role: "
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  await db.insert(messages).values({ conversationId, userId, role, content, language, audioUrl });
-  
-  // Update message count
-  const conv = await getConversationById(conversationId);
-  if (conv) {
-    await db.update(conversations).set({ messageCount: (conv.messageCount || 0) + 1 }).where(eq(conversations.id, conversationId));
+  try {
+    await db.insert(messages).values({
+      conversationId,
+      userId,
+      role,
+      content,
+      language,
+      audioUrl: audioUrl || null,
+      metadata: null,
+    });
+    
+    // Update message count
+    const conv = await getConversationById(conversationId);
+    if (conv) {
+      await db.update(conversations).set({ messageCount: (conv.messageCount || 0) + 1 }).where(eq(conversations.id, conversationId));
+    }
+  } catch (error) {
+    console.error("Error adding message:", error);
+    throw error;
   }
 }
 

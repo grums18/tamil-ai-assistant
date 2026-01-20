@@ -66,8 +66,12 @@ export async function createNewConversation(
     }
 
     const result = await createConversation(userId, title, undefined, language);
-    // Get the last inserted ID from the result
-    const conversationId = (result as any)[0]?.id || Date.now();
+    // Extract conversation ID from result
+    const conversationId = (result as any)?.id;
+
+    if (!conversationId) {
+      throw new Error("Failed to create conversation: no ID returned");
+    }
 
     return {
       conversationId,
