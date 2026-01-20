@@ -1,12 +1,12 @@
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, creatorProfiles, InsertCreatorProfile, conversations, messages, generatedContent, ragDocuments, trends, audioRecordings, usageAnalytics } from "../drizzle/schema";
+import { InsertUser, users, creatorProfiles, InsertCreatorProfile, conversations, messages, generatedContent, ragDocuments, trends, audioRecordings, usageAnalytics, literatureContent, learningPaths, userLearningProgress, literatureAssessments, userAssessmentResults, learningCertificates } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
 // Re-export types for convenience
-export type { User, InsertUser, CreatorProfile, InsertCreatorProfile, Conversation, InsertConversation, Message, InsertMessage, GeneratedContent, InsertGeneratedContent, RAGDocument, InsertRAGDocument, Trend, InsertTrend, AudioRecording, InsertAudioRecording, UsageAnalytics, InsertUsageAnalytics } from "../drizzle/schema";
+export type { User, InsertUser, CreatorProfile, InsertCreatorProfile, Conversation, InsertConversation, Message, InsertMessage, GeneratedContent, InsertGeneratedContent, RAGDocument, InsertRAGDocument, Trend, InsertTrend, AudioRecording, InsertAudioRecording, UsageAnalytics, InsertUsageAnalytics, LiteratureContent, InsertLiteratureContent, LearningPath, InsertLearningPath, UserLearningProgress, InsertUserLearningProgress, LiteratureAssessment, InsertLiteratureAssessment, UserAssessmentResult, InsertUserAssessmentResult, LearningCertificate, InsertLearningCertificate } from "../drizzle/schema";
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {

@@ -14,6 +14,7 @@ import { storageRouter } from "./storage-router";
 import { schedulingRouter } from "./scheduling-router";
 import { youtubeAnalyticsRouter, collaborationRouter } from "./youtube-collaboration-router";
 import { youtubeRouter } from "./youtube-router";
+import { literatureRouter } from "./routers/literature";
 
 export const appRouter = router({
   system: systemRouter,
@@ -60,6 +61,9 @@ export const appRouter = router({
 
   // Collaboration Router
   collaboration: collaborationRouter,
+
+  // Tamil Literature Router
+  literature: literatureRouter,
 
   // Creator Profile Router
   creator: router({

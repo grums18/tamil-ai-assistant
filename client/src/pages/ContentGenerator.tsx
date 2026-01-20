@@ -10,6 +10,7 @@ import { Loader2, Copy, Download, BookOpen, Image as ImageIcon, TrendingUp, Sett
 import { useState } from "react";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
+import PageHeader from "@/components/PageHeader";
 
 export default function ContentGenerator() {
   const { user } = useAuth();
@@ -101,11 +102,7 @@ export default function ContentGenerator() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <div className="container mx-auto p-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Content Generator</h1>
-          <p className="text-slate-400">Generate scripts, thumbnails, SEO optimization, and trend insights</p>
-        </div>
+        <PageHeader title="Content Generator" description="Generate scripts, thumbnails, SEO optimization, and trend insights" />
 
         {/* Input Section */}
         <Card className="mb-8 border-slate-700 bg-slate-800">

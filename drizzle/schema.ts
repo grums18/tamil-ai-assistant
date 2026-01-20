@@ -454,3 +454,151 @@ export const collaborationActivity = mysqlTable("collaboration_activity", {
 
 export type CollaborationActivity = typeof collaborationActivity.$inferSelect;
 export type InsertCollaborationActivity = typeof collaborationActivity.$inferInsert;
+
+/**
+ * Tamil Literature Content - Thirukkural, Stories, and Educational Materials
+ */
+export const literatureContent = mysqlTable("literature_content", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  contentType: mysqlEnum("content_type", ["kural", "story", "poem", "essay", "lesson"]).notNull(),
+  category: varchar("category", { length: 100 }).notNull(), // "thirukkural", "silappathikaram", "sangam", etc.
+  tamilText: text("tamil_text").notNull(),
+  englishTranslation: text("english_translation").notNull(),
+  tanglishTransliteration: text("tanglish_transliteration"),
+  meaning: text("meaning"), // Detailed explanation
+  culturalContext: text("cultural_context"), // Historical and cultural significance
+  author: varchar("author", { length: 255 }),
+  period: varchar("period", { length: 100 }), // Historical period
+  audioUrl: varchar("audio_url", { length: 512 }), // TTS audio file URL
+  difficulty: mysqlEnum("difficulty", ["beginner", "intermediate", "advanced"]).default("beginner"),
+  tags: json("tags"), // ["virtue", "love", "wealth", etc.]
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  categoryIdx: index("category_idx").on(table.category),
+  contentTypeIdx: index("content_type_idx").on(table.contentType),
+  difficultyIdx: index("difficulty_idx").on(table.difficulty),
+}));
+
+export type LiteratureContent = typeof literatureContent.$inferSelect;
+export type InsertLiteratureContent = typeof literatureContent.$inferInsert;
+
+/**
+ * Learning Paths - Structured curriculum for Tamil literature
+ */
+export const learningPaths = mysqlTable("learning_paths", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  level: mysqlEnum("level", ["beginner", "intermediate", "advanced"]).notNull(),
+  duration: varchar("duration", { length: 100 }), // "4 weeks", "8 weeks", etc.
+  targetAudience: varchar("target_audience", { length: 255 }), // "English speakers", "Diaspora kids", "Deep learners"
+  contentIds: json("content_ids"), // Array of literature_content IDs
+  learningObjectives: json("learning_objectives"), // Array of objectives
+  assessmentType: mysqlEnum("assessment_type", ["quiz", "essay", "project", "discussion"]),
+  certificateEligible: boolean("certificate_eligible").default(true),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  levelIdx: index("level_idx").on(table.level),
+}));
+
+export type LearningPath = typeof learningPaths.$inferSelect;
+export type InsertLearningPath = typeof learningPaths.$inferInsert;
+
+/**
+ * User Learning Progress - Track user progress through literature learning
+ */
+export const userLearningProgress = mysqlTable("user_learning_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  learningPathId: int("learning_path_id").notNull(),
+  contentId: int("content_id").notNull(),
+  status: mysqlEnum("status", ["not_started", "in_progress", "completed", "reviewed"]).default("not_started"),
+  score: decimal("score", { precision: 5, scale: 2 }), // Quiz/assessment score
+  timeSpent: int("time_spent").default(0), // in seconds
+  notes: text("notes"), // User's personal notes
+  bookmarked: boolean("bookmarked").default(false),
+  completedAt: timestamp("completed_at"),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  learningPathIdIdx: index("learning_path_id_idx").on(table.learningPathId),
+  contentIdIdx: index("content_id_idx").on(table.contentId),
+  statusIdx: index("status_idx").on(table.status),
+}));
+
+export type UserLearningProgress = typeof userLearningProgress.$inferSelect;
+export type InsertUserLearningProgress = typeof userLearningProgress.$inferInsert;
+
+/**
+ * Literature Assessments - Quizzes and evaluations
+ */
+export const literatureAssessments = mysqlTable("literature_assessments", {
+  id: int("id").autoincrement().primaryKey(),
+  learningPathId: int("learning_path_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  assessmentType: mysqlEnum("assessment_type", ["quiz", "essay", "project", "discussion"]).notNull(),
+  questions: json("questions"), // Array of question objects
+  passingScore: decimal("passing_score", { precision: 5, scale: 2 }).default("70"),
+  timeLimit: int("time_limit"), // in minutes
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  learningPathIdIdx: index("learning_path_id_idx").on(table.learningPathId),
+}));
+
+export type LiteratureAssessment = typeof literatureAssessments.$inferSelect;
+export type InsertLiteratureAssessment = typeof literatureAssessments.$inferInsert;
+
+/**
+ * User Assessment Results - Store assessment submissions and scores
+ */
+export const userAssessmentResults = mysqlTable("user_assessment_results", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  assessmentId: int("assessment_id").notNull(),
+  responses: json("responses"), // User's answers
+  score: decimal("score", { precision: 5, scale: 2 }).notNull(),
+  passed: boolean("passed").notNull(),
+  feedback: text("feedback"), // AI-generated feedback
+  timeSpent: int("time_spent").default(0), // in seconds
+  metadata: json("metadata"),
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  assessmentIdIdx: index("assessment_id_idx").on(table.assessmentId),
+}));
+
+export type UserAssessmentResult = typeof userAssessmentResults.$inferSelect;
+export type InsertUserAssessmentResult = typeof userAssessmentResults.$inferInsert;
+
+/**
+ * Learning Certificates - Track user achievements
+ */
+export const learningCertificates = mysqlTable("learning_certificates", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  learningPathId: int("learning_path_id").notNull(),
+  certificateCode: varchar("certificate_code", { length: 100 }).unique().notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  issueDate: timestamp("issue_date").defaultNow().notNull(),
+  expiryDate: timestamp("expiry_date"),
+  certificateUrl: varchar("certificate_url", { length: 512 }),
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  learningPathIdIdx: index("learning_path_id_idx").on(table.learningPathId),
+}));
+
+export type LearningCertificate = typeof learningCertificates.$inferSelect;
+export type InsertLearningCertificate = typeof learningCertificates.$inferInsert;

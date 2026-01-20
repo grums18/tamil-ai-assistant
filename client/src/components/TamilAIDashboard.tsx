@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, Zap, Mic, TrendingUp, Settings, LogOut } from "lucide-react";
+import { MessageCircle, Zap, Mic, TrendingUp, Settings, LogOut, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -50,6 +50,13 @@ export function TamilAIDashboard({ onNavigate }: DashboardProps) {
       path: "/trends",
       color: "bg-orange-500",
     },
+    {
+      title: "Tamil Literature",
+      description: "Learn Tamil heritage & Thirukkural",
+      icon: BookOpen,
+      path: "/literature",
+      color: "bg-red-500",
+    },
   ];
 
   return (
@@ -92,7 +99,7 @@ export function TamilAIDashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -145,6 +152,16 @@ export function TamilAIDashboard({ onNavigate }: DashboardProps) {
             <CardContent>
               <p className="text-3xl font-bold text-white">0</p>
               <p className="text-xs text-slate-400 mt-1">Transcribed</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-700 bg-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-sm font-medium">Literature Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-white">0</p>
+              <p className="text-xs text-slate-400 mt-1">Kurals learned</p>
             </CardContent>
           </Card>
         </div>

@@ -9,6 +9,7 @@ import { Loader2, Send, Plus, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
+import PageHeader from "@/components/PageHeader";
 
 interface Message {
   id?: number;
@@ -95,6 +96,9 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      <div className="container mx-auto p-4">
+        <PageHeader title="Chat with AI" description="Have natural conversations in Tamil and Tanglish" />
+      </div>
       <div className="container mx-auto h-screen flex gap-4 p-4">
         {/* Sidebar - Conversation History */}
         <div className="w-64 flex flex-col gap-4">
