@@ -1,41 +1,5 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "5",
-      "when": 1768932242628,
-      "tag": "0000_wonderful_typhoid_mary",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1768932430394,
-      "tag": "0001_last_shadow_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1768934451456,
-      "tag": "0002_previous_prism",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1768935185485,
-      "tag": "0003_careless_eternals",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1768943637954,
-      "tag": "0004_spooky_doorman",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
